@@ -1,3 +1,14 @@
+// Minimal API helper using Vite env vars
+export const API_URL = import.meta.env.VITE_API_URL;
+
+export async function createRoom(payload = {}) {
+  const res = await fetch(`${API_URL}/api/room/create`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+}
 import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";

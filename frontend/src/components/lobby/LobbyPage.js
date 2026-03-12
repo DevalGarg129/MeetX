@@ -11,7 +11,15 @@ const LobbyPage = () => {
   const { roomCode: paramCode } = useParams();
   const navigate = useNavigate();
   const socket = useSocket();
-  const { userName, setUserName, roomCode, setRoomCode, setRoomName, setMicOn, setCamOn } = useRoom();
+  const {
+    userName,
+    setUserName,
+    roomCode,
+    setRoomCode,
+    setRoomName,
+    setMicOn,
+    setCamOn,
+  } = useRoom();
   const { toasts, showToast, removeToast } = useToast();
 
   const videoRef = useRef(null);
@@ -20,7 +28,10 @@ const LobbyPage = () => {
   const [localMic, setLocalMic] = useState(true);
   const [localCam, setLocalCam] = useState(true);
   const [displayName, setDisplayName] = useState(userName || "");
-  const [lobbyInfo, setLobbyInfo] = useState({ participantCount: 0, participants: [] });
+  const [lobbyInfo, setLobbyInfo] = useState({
+    participantCount: 0,
+    participants: [],
+  });
   const [roomInfo, setRoomInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [devices, setDevices] = useState({ mics: [], cameras: [] });
@@ -31,7 +42,10 @@ const LobbyPage = () => {
   // Load room info
   useEffect(() => {
     const code = paramCode || roomCode;
-    if (!code) { navigate("/"); return; }
+    if (!code) {
+      navigate("/");
+      return;
+    }
     setRoomCode(code);
 
     getRoom(code)
@@ -47,7 +61,10 @@ const LobbyPage = () => {
   useEffect(() => {
     const startPreview = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
         streamRef.current = stream;
         if (videoRef.current) videoRef.current.srcObject = stream;
 
@@ -63,24 +80,30 @@ const LobbyPage = () => {
     startPreview();
 
     return () => {
-      if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
+      if (streamRef.current)
+        streamRef.current.getTracks().forEach((t) => t.stop());
     };
   }, []);
 
   const toggleMic = () => {
     const next = !localMic;
     setLocalMic(next);
-    if (streamRef.current) streamRef.current.getAudioTracks().forEach((t) => (t.enabled = next));
+    if (streamRef.current)
+      streamRef.current.getAudioTracks().forEach((t) => (t.enabled = next));
   };
 
   const toggleCam = () => {
     const next = !localCam;
     setLocalCam(next);
-    if (streamRef.current) streamRef.current.getVideoTracks().forEach((t) => (t.enabled = next));
+    if (streamRef.current)
+      streamRef.current.getVideoTracks().forEach((t) => (t.enabled = next));
   };
 
   const handleJoin = () => {
-    if (!displayName.trim()) { showToast("⚠️", "Enter your name to continue"); return; }
+    if (!displayName.trim()) {
+      showToast("⚠️", "Enter your name to continue");
+      return;
+    }
     setLoading(true);
     setUserName(displayName.trim());
     setMicOn(localMic);
@@ -101,37 +124,72 @@ const LobbyPage = () => {
       <div
         className="fade-in"
         style={{
-          position: "relative", zIndex: 1,
-          display: "flex", flexDirection: "column", alignItems: "center",
-          justifyContent: "center", minHeight: "100vh", padding: "80px 20px 40px",
+          position: "relative",
+          zIndex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          padding: "80px 20px 40px",
         }}
       >
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 340px",
-            gap: 20, width: "100%", maxWidth: 920,
+            gap: 20,
+            width: "100%",
+            maxWidth: 920,
           }}
         >
           {/* ── Camera preview panel ── */}
-          <div className="card" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 18 }}>
+          <div
+            className="card"
+            style={{
+              padding: 24,
+              display: "flex",
+              flexDirection: "column",
+              gap: 18,
+            }}
+          >
             <h3 style={{ fontSize: 17 }}>Camera & Audio Preview</h3>
 
             {/* Video */}
             <div
               style={{
-                position: "relative", background: "#000",
-                borderRadius: "var(--radius)", aspectRatio: "16/9",
+                position: "relative",
+                background: "#000",
+                borderRadius: "var(--radius)",
+                aspectRatio: "16/9",
                 overflow: "hidden",
               }}
             >
               <video
                 ref={videoRef}
-                autoPlay muted playsInline
-                style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)", display: localCam ? "block" : "none" }}
+                autoPlay
+                muted
+                playsInline
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  transform: "scaleX(-1)",
+                  display: localCam ? "block" : "none",
+                }}
               />
               {!localCam && (
-                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48, color: "var(--text3)" }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 48,
+                    color: "var(--text3)",
+                  }}
+                >
                   📷
                 </div>
               )}
@@ -156,8 +214,23 @@ const LobbyPage = () => {
             </div>
 
             {/* Feature 5: Audio Level Meter */}
-            <div style={{ background: "var(--bg3)", borderRadius: "var(--radius-sm)", padding: 14 }}>
-              <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 8, fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase" }}>
+            <div
+              style={{
+                background: "var(--bg3)",
+                borderRadius: "var(--radius-sm)",
+                padding: 14,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "var(--text3)",
+                  marginBottom: 8,
+                  fontWeight: 600,
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                }}
+              >
                 Microphone Level
               </div>
               <AudioMeterBars level={level} />
@@ -171,38 +244,104 @@ const LobbyPage = () => {
           </div>
 
           {/* ── Info / Join panel ── */}
-          <div className="card" style={{ padding: 26, display: "flex", flexDirection: "column", gap: 20 }}>
+          <div
+            className="card"
+            style={{
+              padding: 26,
+              display: "flex",
+              flexDirection: "column",
+              gap: 20,
+            }}
+          >
             <div>
-              <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 5 }}>READY TO JOIN</div>
-              <h2 style={{ fontSize: 20 }}>{roomInfo?.roomName || "Meeting Room"}</h2>
+              <div
+                style={{ fontSize: 11, color: "var(--text3)", marginBottom: 5 }}
+              >
+                READY TO JOIN
+              </div>
+              <h2 style={{ fontSize: 20 }}>
+                {roomInfo?.roomName || "Meeting Room"}
+              </h2>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <InfoRow label="Room Code" value={<span style={{ color: "var(--accent)", fontFamily: "monospace" }}>{code}</span>} />
-              <InfoRow label="Status" value={<span style={{ color: "var(--success)", display: "flex", alignItems: "center", gap: 6 }}><span className="live-dot" />Live</span>} />
-              <InfoRow label="Participants" value={`${lobbyInfo.participantCount} already in room`} />
+              <InfoRow
+                label="Room Code"
+                value={
+                  <span
+                    style={{ color: "var(--accent)", fontFamily: "monospace" }}
+                  >
+                    {code}
+                  </span>
+                }
+              />
+              <InfoRow
+                label="Status"
+                value={
+                  <span
+                    style={{
+                      color: "var(--success)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    <span className="live-dot" />
+                    Live
+                  </span>
+                }
+              />
+              <InfoRow
+                label="Participants"
+                value={`${lobbyInfo.participantCount} already in room`}
+              />
             </div>
 
             {/* Participant avatars */}
             {lobbyInfo.participants.length > 0 && (
               <div>
-                <div style={{ fontSize: 11, color: "var(--text2)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "var(--text2)",
+                    marginBottom: 8,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                  }}
+                >
                   In Meeting
                 </div>
                 <div style={{ display: "flex", gap: -6, alignItems: "center" }}>
                   {lobbyInfo.participants.slice(0, 4).map((p, i) => (
-                    <div key={i} style={{
-                      width: 34, height: 34, borderRadius: "50%",
-                      background: "linear-gradient(135deg, var(--accent), var(--accent2))",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 13, fontWeight: 700, border: "2px solid var(--bg2)",
-                      marginLeft: i === 0 ? 0 : -8, zIndex: 10 - i,
-                    }}>
+                    <div
+                      key={i}
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: "50%",
+                        background:
+                          "linear-gradient(135deg, var(--accent), var(--accent2))",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 13,
+                        fontWeight: 700,
+                        border: "2px solid var(--bg2)",
+                        marginLeft: i === 0 ? 0 : -8,
+                        zIndex: 10 - i,
+                      }}
+                    >
                       {p.name.charAt(0).toUpperCase()}
                     </div>
                   ))}
                   {lobbyInfo.participants.length > 4 && (
-                    <span style={{ fontSize: 12, color: "var(--text2)", marginLeft: 8 }}>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        color: "var(--text2)",
+                        marginLeft: 8,
+                      }}
+                    >
                       +{lobbyInfo.participants.length - 4} more
                     </span>
                   )}
@@ -249,11 +388,18 @@ const LobbyPage = () => {
 const AudioMeterBars = ({ level }) => {
   const NUM = 18;
   return (
-    <div style={{ display: "flex", gap: 3, alignItems: "flex-end", height: 30 }}>
+    <div
+      style={{ display: "flex", gap: 3, alignItems: "flex-end", height: 30 }}
+    >
       {Array.from({ length: NUM }).map((_, i) => {
         const threshold = i / NUM;
         const active = level > threshold;
-        const color = level > 0.75 ? "var(--danger)" : level > 0.45 ? "var(--warn)" : "var(--accent)";
+        const color =
+          level > 0.75
+            ? "var(--danger)"
+            : level > 0.45
+              ? "var(--warn)"
+              : "var(--accent)";
         return (
           <div
             key={i}
@@ -272,10 +418,16 @@ const AudioMeterBars = ({ level }) => {
 };
 
 const InfoRow = ({ label, value }) => (
-  <div style={{
-    display: "flex", alignItems: "center", justifyContent: "space-between",
-    padding: "9px 12px", background: "var(--bg3)", borderRadius: "var(--radius-xs)",
-  }}>
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "9px 12px",
+      background: "var(--bg3)",
+      borderRadius: "var(--radius-xs)",
+    }}
+  >
     <span style={{ fontSize: 12, color: "var(--text2)" }}>{label}</span>
     <span style={{ fontSize: 13, fontWeight: 500 }}>{value}</span>
   </div>
@@ -285,10 +437,15 @@ const DeviceRow = ({ icon, label, options }) => (
   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
     <span style={{ fontSize: 14, flexShrink: 0 }}>{icon}</span>
     <select className="form-select" style={{ flex: 1 }}>
-      {options.length > 0
-        ? options.map((d, i) => <option key={i} value={d.deviceId}>{d.label || `${label} ${i + 1}`}</option>)
-        : <option>{label} (default)</option>
-      }
+      {options.length > 0 ? (
+        options.map((d, i) => (
+          <option key={i} value={d.deviceId}>
+            {d.label || `${label} ${i + 1}`}
+          </option>
+        ))
+      ) : (
+        <option>{label} (default)</option>
+      )}
     </select>
   </div>
 );
