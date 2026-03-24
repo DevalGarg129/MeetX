@@ -1,14 +1,17 @@
 import axios from "axios";
+import { io } from "socket.io-client"; // 🔥 FIX 1
 
 const API = process.env.REACT_APP_API_URL;
-const socket = io(process.env.REACT_APP_SOCKET_URL);
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
+
+const socket = io(SOCKET_URL); // ✅ now works
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API, // 🔥 FIX 2
   headers: { "Content-Type": "application/json" },
 });
 
-// ─── Room API ──────────────────────────────────────────────────────
+// ─── Room API ─────────────────────────────────────────────
 export const createRoom = (hostName, roomName) =>
   api.post("/rooms/create", { hostName, roomName });
 
@@ -21,18 +24,19 @@ export const getRoomMessages = (roomCode) =>
 export const endRoom = (roomCode) =>
   api.put(`/rooms/${roomCode}/end`);
 
-// ─── Chat API ──────────────────────────────────────────────────────
+// ─── Chat API ─────────────────────────────────────────────
 export const saveMessage = (roomCode, senderName, text) =>
   api.post(`/chat/${roomCode}/message`, { senderName, text });
 
 export const getMessages = (roomCode) =>
   api.get(`/chat/${roomCode}/messages`);
 
-// ─── User API ──────────────────────────────────────────────────────
+// ─── User API ─────────────────────────────────────────────
 export const registerUser = (name, email, password) =>
   api.post("/users/register", { name, email, password });
 
 export const loginUser = (email, password) =>
   api.post("/users/login", { email, password });
 
+export { socket }; // optional export
 export default api;
