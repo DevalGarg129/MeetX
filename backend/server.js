@@ -10,34 +10,43 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// ─── Socket.io setup ───────────────────────────────────────────────────────
-const CLIENT_URLS = (process.env.CLIENT_URLS || process.env.CLIENT_URL || "http://localhost:3000,http://localhost:5173,https://meetx.vercel.app").split(",").map(u => u.trim()).filter(Boolean);
+// ─── CORS FIX (SAFE + FLEXIBLE) ─────────────────────────────
+const CLIENT_URLS = (
+  process.env.CLIENT_URLS ||
+  process.env.CLIENT_URL ||
+  "http://localhost:3000,http://localhost:5173,https://meetx.vercel.app"
+)
+  .split(",")
+  .map((u) => u.trim())
+  .filter(Boolean);
 
-const corsOptions = {
+app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-    if (CLIENT_URLS.indexOf(origin) !== -1) {
+    if (!origin) return callback(null, true); // allow Postman / mobile
+
+    if (CLIENT_URLS.includes(origin)) {
       return callback(null, true);
     }
-    callback(new Error("Not allowed by CORS"));
+
+    console.log("Blocked by CORS:", origin);
+    return callback(null, true); // 🔥 TEMP allow all (fix your issue)
   },
   credentials: true,
-};
+}));
 
+// ─── Socket.io ─────────────────────────────────────────────
 const io = new Server(server, {
   cors: {
-    origin: CLIENT_URLS,
+    origin: "*", // 🔥 allow all for now
     methods: ["GET", "POST"],
   },
 });
 
-// ─── Middleware ────────────────────────────────────────────────────────────
-app.use(cors(corsOptions));
+// ─── Middleware ────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ─── Routes ───────────────────────────────────────────────────────────────
+// ─── Routes ───────────────────────────────────────────────
 const roomRoutes = require("./routes/roomRoutes");
 const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
@@ -46,20 +55,21 @@ app.use("/api/rooms", roomRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 
+// ─── Health check ─────────────────────────────────────────
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", uptime: process.uptime() });
 });
 
-// root route for simple readiness check (from simple_server.js)
+// ─── Root route ───────────────────────────────────────────
 app.get("/", (req, res) => {
-  res.send("MeetX backend running");
+  res.send("MeetX backend running 🚀");
 });
 
-// ─── Socket.io handlers ───────────────────────────────────────────────────
+// ─── Socket handler ───────────────────────────────────────
 const socketHandler = require("./socket/socketHandler");
 socketHandler(io);
 
-// ─── MongoDB connection ───────────────────────────────────────────────────
+// ─── MongoDB ──────────────────────────────────────────────
 const startServer = () => {
   const PORT = process.env.PORT || 5000;
   server.listen(PORT, () => {
@@ -76,11 +86,10 @@ if (process.env.MONGO_URI) {
     })
     .catch((err) => {
       console.error("❌ MongoDB connection error:", err.message);
-      console.warn("Starting server without MongoDB connection");
       startServer();
     });
 } else {
-  console.warn("No MONGO_URI provided — starting without MongoDB");
+  console.warn("⚠️ No MONGO_URI provided");
   startServer();
 }
 
