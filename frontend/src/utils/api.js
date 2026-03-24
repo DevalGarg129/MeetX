@@ -13,30 +13,30 @@ const api = axios.create({
 
 // ─── Room API ─────────────────────────────────────────────
 export const createRoom = (hostName, roomName) =>
-  api.post("/rooms/create", { hostName, roomName });
+  api.post("/api/rooms/create", { hostName, roomName });
 
 export const getRoom = (roomCode) =>
-  api.get(`/rooms/${roomCode}`);
+  api.get(`/api/rooms/${roomCode}`);
 
 export const getRoomMessages = (roomCode) =>
-  api.get(`/rooms/${roomCode}/messages`);
+  api.get(`/api/rooms/${roomCode}/messages`);
 
 export const endRoom = (roomCode) =>
-  api.put(`/rooms/${roomCode}/end`);
+  api.put(`/api/rooms/${roomCode}/end`);
 
 // ─── Chat API ─────────────────────────────────────────────
 export const saveMessage = (roomCode, senderName, text) =>
-  api.post(`/chat/${roomCode}/message`, { senderName, text });
+  api.post(`/api/chat/${roomCode}/message`, { senderName, text });
 
 export const getMessages = (roomCode) =>
-  api.get(`/chat/${roomCode}/messages`);
+  api.get(`/api/chat/${roomCode}/messages`);
 
 // ─── User API ─────────────────────────────────────────────
 export const registerUser = (name, email, password) =>
-  api.post("/users/register", { name, email, password });
+  api.post("/api/users/register", { name, email, password });
 
 export const loginUser = (email, password) =>
-  api.post("/users/login", { email, password });
+  api.post("/api/users/login", { email, password });
 
 export { socket }; // optional export
 export default api;
