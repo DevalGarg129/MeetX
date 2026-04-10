@@ -1,4 +1,5 @@
 const Room = require("../models/Room");
+const redisClient = require("../config/redis");
 const { v4: uuidv4 } = require("uuid");
 
 // Generate short room code like "abc-xyz-123"
@@ -52,21 +53,45 @@ const createRoom = async (req, res) => {
 
 // GET /api/rooms/:roomCode
 const getRoom = async (req, res) => {
+  const startTime = Date.now();
+
+  const { roomCode } = req.params;
+  const key = `room:${roomCode}`;
+
   try {
-    const { roomCode } = req.params;
-    const room = await Room.findOne({ roomCode, isActive: true });
-    if (!room) {
-      return res.status(404).json({ message: "Room not found or no longer active" });
+    // 1️⃣ Check Redis
+    const cached = await redisClient.get(key);
+
+    if (cached) {
+      console.log("Cache HIT ⚡");
+      return res.json({ success: true, ...JSON.parse(cached) });
     }
-    res.json({
-      success: true,
+
+    // 2️⃣ Fetch from DB
+    console.log("Cache MISS ❌");
+    const room = await Room.findOne({ roomCode });
+
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    const responseData = {
       roomCode: room.roomCode,
       roomName: room.roomName,
       hostName: room.hostName,
       participantCount: room.participants.length,
       startedAt: room.startedAt,
+    };
+
+    // 3️⃣ Store in Redis (IMPORTANT)
+    await redisClient.set(key, JSON.stringify(responseData), {
+      EX: 60, // cache for 60 seconds
     });
+
+    return res.json({ success: true, ...responseData });
+
   } catch (err) {
+    console.error("getRoom error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
